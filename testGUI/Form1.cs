@@ -23,7 +23,7 @@ namespace testGUI
         public setFirmwrDelegate firmwrDelegate;
         public delegate void setTimeDelegate(String myString);
         public setTimeDelegate timeDelegate;
-        bool status = false;
+        bool ledStatus = false;
         volatile bool running = false;
         string firmware = "";
         string serial = "";
@@ -125,15 +125,15 @@ namespace testGUI
                 string new_s = s;
                 Console.WriteLine("read State");
                 //string new_s = s.Replace("state=", "");
-                if (new_s.Contains("0"))
+                if (new_s.Contains("1")) //the light is on
                 {
-                    status = false;
-                    buttonLED.Invoke(this.myDelegate_button, new Object[] { "ON" });
-                }
-                else
-                {
-                    status = true;
+                    ledStatus = true;
                     buttonLED.Invoke(this.myDelegate_button, new Object[] { "OFF" });
+                }
+                else //the light is off
+                {
+                    ledStatus = false;
+                    buttonLED.Invoke(this.myDelegate_button, new Object[] { "ON" });
                 }
             }
             else if (s.Contains("info=")) //starts as "info=firmware~serial"
@@ -159,17 +159,16 @@ namespace testGUI
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (buttonLED.Text.Contains("ON"))
+            if (ledStatus) //the light is on
             {
                 serialPort1.WriteLine("OFF");
                 buttonLED.Text = "OFF";
-                status = false;
-            }
-            else
+                ledStatus = false;
+            } else //the light is off
             {
                 serialPort1.WriteLine("ON");
                 buttonLED.Text = "ON";
-                status = true;
+                ledStatus = true;
             }
         }
 
