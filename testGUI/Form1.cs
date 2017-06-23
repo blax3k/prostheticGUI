@@ -67,7 +67,7 @@ namespace testGUI
                 MessageBox.Show("No device detected" + "\n" + exception, "Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Close();
             }
-        }
+        } 
 
         private void startTimeThread()
         {
