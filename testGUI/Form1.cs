@@ -11,6 +11,7 @@ using System.Windows.Forms;
 
 namespace testGUI
 {
+   
     public partial class Form1 : Form
     {
         public delegate void SetTextDelegate(String myString);
@@ -23,14 +24,22 @@ namespace testGUI
         public setFirmwrDelegate firmwrDelegate;
         public delegate void setTimeDelegate(String myString);
         public setTimeDelegate timeDelegate;
+        public delegate void addListBoxDelegate(List<Variable> myList);
+        public addListBoxDelegate listBoxDelegate;
         bool ledStatus = false;
         volatile bool running = false;
-        string firmware = "";
-        string serial = "";
+        string serialNumber = "";
+        string firmwareNumber = "";
+        int varCount = 0;
+        private int lastSelected = 0;
         const string STATE = "STATE=",
             INFO = "INFO=",
             GETTIME = "GETTIME=",
-            SYNCTIME = "SYNCTIME";
+            SYNCTIME = "SYNCTIME",
+            GETVARS = "GETVARS=",
+            GETVAR = "GETVAR",
+            SETVAR = "SETVAR";
+        Variables varHolder;
 
 
         public Form1()
@@ -43,22 +52,25 @@ namespace testGUI
         */
         private void Form1_Load(object sender, EventArgs e)
         {
+            varHolder = new Variables();
             running = true;
             this.textDelegate = new SetTextDelegate(AddDataMethod);
             this.myDelegate_button = new AddDataDelegate_button(setButtonLEDText);
             this.serialDelegate = new setSerialDelegate(setSerial);
             this.firmwrDelegate = new setFirmwrDelegate(setFirmware);
             this.timeDelegate = new setTimeDelegate(setTime);
+            this.listBoxDelegate = new addListBoxDelegate(setListBox);
 
             try
-            {                       //try to establish a connection
-                serialPort1.Open();
-                serialPort1.WriteLine(STATE);
-                //setup Serial number
-                serialPort1.WriteLine(INFO);
-                serialPort1.WriteLine(GETTIME);
-
+            {                       
+                serialPort1.Open();//try to establish a connection
+                serialPort1.WriteLine(STATE); //get the state of the LED
+                serialPort1.WriteLine(INFO);    //get the serial number and firmware
+                serialPort1.WriteLine(GETTIME); //get the time from the board
+                serialPort1.WriteLine(GETVARS); //get the variables from the running program
+                //start new thread to handle periodically getting the time
                 Thread timeThread = new Thread(new ThreadStart(this.startTimeThread));
+                timeThread.IsBackground = true; 
                 timeThread.Start();
 
             }
@@ -67,19 +79,30 @@ namespace testGUI
                 MessageBox.Show("No device detected" + "\n" + exception, "Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Close();
             }
-        } 
-
+        }
+        #region setText
+        /*
+        starts seperate thread that checks the time every few seconds
+        */
         private void startTimeThread()
         {
             while (running)
             {
-                serialPort1.WriteLine(GETTIME);
-                System.Threading.Thread.Sleep(5000);
+                try
+                {
+                    serialPort1.WriteLine(GETTIME);
+                    System.Threading.Thread.Sleep(5000);
+
+                }catch(Exception e)
+                {
+                    MessageBox.Show("The device couldn't be reached" + "\n" + e, "Runtime Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Application.Exit();
+                }
             }
         }
 
         /*
-
+        set the text on the LED button
         */
         private void setButtonLEDText(string myString)
         {
@@ -113,51 +136,163 @@ namespace testGUI
         {
             labelTime.Text = time;
         }
+
+        private void setListBox(List<Variable> itemList)
+        {
+            listBoxVariables.Items.Clear();
+            foreach (Variable var in itemList)
+            {
+                string varID = var.id.ToString();
+                string listItem = varID.PadRight(6 - varID.Length) + "\t" +
+                   var.name.PadRight(20 - var.name.Length) + "\t" +
+                   var.type.PadRight(10 - var.type.Length) + "\t" +
+                   var.value;
+                listBoxVariables.Items.Add(listItem);
+            }
+            if(this.listBoxVariables.SelectedIndex == -1)
+            {
+                this.listBoxVariables.SetSelected(lastSelected, true);
+            }
+        }
+        #endregion
         /*
         handles input from the serial port
         */
         private void serialPort1_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
-            string s = serialPort1.ReadLine(); //get the data
-            if (s.Contains("STATE=")) //received the LED state
+            try
             {
-                s = s.Trim();
-                string new_s = s;
-                Console.WriteLine("read State");
-                //string new_s = s.Replace("state=", "");
-                if (new_s.Contains("1")) //the light is on
+                string s = serialPort1.ReadLine(); //get the data
+                if (s.Contains("STATE=")) //received the LED state
                 {
-                    ledStatus = true;
-                    buttonLED.Invoke(this.myDelegate_button, new Object[] { "OFF" });
+                    s = s.Trim();
+                    string new_s = s;
+                    //string new_s = s.Replace("state=", "");
+                    if (new_s.Contains("1")) //the light is on
+                    {
+                        ledStatus = true;
+                        buttonLED.Invoke(this.myDelegate_button, new Object[] { "OFF" });
+                    }
+                    else //the light is off
+                    {
+                        ledStatus = false;
+                        buttonLED.Invoke(this.myDelegate_button, new Object[] { "ON" });
+                    }
                 }
-                else //the light is off
+                else if (s.Contains("info=")) //get firmware and serial data. data formatted as "info=firmware~serial"
                 {
-                    ledStatus = false;
-                    buttonLED.Invoke(this.myDelegate_button, new Object[] { "ON" });
+                    s = s.Trim();
+                    s = s.Replace("info=", ""); //becomes "firmware~serial"
+                    string[] infoArray = s.Split('~'); //split into firmware and serial
+                    labelSerial.Invoke(this.serialDelegate, new Object[] { infoArray[1] });
+                    labelFirmware.Invoke(this.firmwrDelegate, new Object[] { infoArray[0] });
                 }
-            }
-            else if (s.Contains("info=")) //starts as "info=firmware~serial"
+                else if (s.Contains("time=")) //receive the time from the device
+                {
+                    s = s.Trim();
+                    s = s.Replace("time=", "board time: ");
+                    labelTime.Invoke(this.timeDelegate, new Object[] { s });
+                }
+                else if (s.Contains("VAR=")) //receive a single variable data
+                {
+                    s = s.Replace("VAR=", ""); 
+                    string[] var = s.Split('~');
+                    varHolder.addVariable(var);
+                    listBoxVariables.Invoke(this.listBoxDelegate, new Object[] { varHolder.varList });
+                }
+                else
+                {
+                    richTextBox1.Invoke(this.textDelegate, new Object[] { s });
+                }
+            }catch(Exception exception)
             {
-                s = s.Trim();
-                s = s.Replace("info=", ""); //becomes "firmware~serial"
-                string[] infoArray = s.Split('~'); //split into firmware and serial
-                labelSerial.Invoke(this.serialDelegate, new Object[] { infoArray[1] });
-                labelFirmware.Invoke(this.firmwrDelegate, new Object[] { infoArray[0] });
-            }
-            else if (s.Contains("time="))
-            {
-                //s.Replace("time=", "");
-                s = s.Trim();
-                s = s.Replace("time=", "Time: ");
-                labelTime.Invoke(this.timeDelegate, new Object[] { s });
-            }
-            else
-            {
-                richTextBox1.Invoke(this.textDelegate, new Object[] { s });
+
+                MessageBox.Show("The Device couldn't be reached" + "\n" + exception, "Runtime Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        #region FormInteraction
+
+        /*
+        Sends a request to the board to resend & refresh the list of variables
+        */
+        private void buttonRefresh_Click(object sender, EventArgs e)
+        {
+            serialPort1.WriteLine("GETVARS");
+        }
+
+        /*
+        User wishes to modify the variable
+        */
+        private void butonApply_Click(object sender, EventArgs e)
+        {
+            string newValue = textBox1.Text;
+            int index = listBoxVariables.SelectedIndex;
+            string type = varHolder.varList.ElementAt(index).type;
+            if (varHolder.validVarChange(type, newValue))
+            {
+                Console.WriteLine("index: " + index + "  type: " + type + "  newValue: " + newValue);
+                string message = SETVAR + index + '~' + newValue + '=';
+                serialPort1.Write(message);
+                //send data to board
+                //reset error message
+                labelError.Text = "";
+                serialPort1.Write(INFO);
+            }
+            else
+            {
+                textBox1.Text = varHolder.varList[index].value;
+                labelError.Text = "Invalid input type. please enter a(n) " + type;
+            }
+        }
+        //handles textbox interaction
+        #region textBox
+
+        bool alreadyFocused;
+        private void textBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Enter)
+            {
+                butonApply_Click(this, new EventArgs());   
+            }
+        }
+
+        private void textBox1_Leave(object sender, EventArgs e)
+        {
+            alreadyFocused = false;
+        }
+
+ 
+        private void textBox1_MouseUp(object sender, MouseEventArgs e)
+        {
+            if(!alreadyFocused && this.textBox1.SelectionLength == 0)
+            {
+                alreadyFocused = true;
+                this.textBox1.SelectAll();
+            }
+        }
+
+        private void textBox1_Validated(object sender, EventArgs e)
+        {
+            if (MouseButtons == MouseButtons.None)
+            {
+                this.textBox1.SelectAll();
+                alreadyFocused = true;
+            }
+        }
+        #endregion 
+
+        /*
+        Reset button is pressed
+        */
+        private void buttonReset_Click(object sender, EventArgs e)
+        {
+            serialPort1.WriteLine("RES=");
+            richTextBox1.Clear();
+        }
+
+        private void buttonLED_Click(object sender, EventArgs e)
         {
             if (ledStatus) //the light is on
             {
@@ -172,15 +307,10 @@ namespace testGUI
             }
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            running = false;
-        }
-
         /*
         Sync Time button
         */
-        private void button2_Click(object sender, EventArgs e)
+        private void buttonSyncTime_Click(object sender, EventArgs e)
         {
             Int32 unixTimestamp = (Int32)(DateTime.Now.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
             string unixDate = SYNCTIME;
@@ -188,6 +318,33 @@ namespace testGUI
             serialPort1.WriteLine(unixDate);
             //serialPort1.WriteLine("T1262347200");
         }
+
+        /*
+        listbox selected item changed
+        */
+        private void listBoxVariables_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int index = listBoxVariables.SelectedIndex;
+            lastSelected = index;
+            serialPort1.Write(GETVAR + index + "=");
+            try
+            {
+                textBox1.Text = varHolder.varList[index].value;
+            }
+            catch (Exception exception)
+            {
+
+            }
+            textBox1.Focus();
+        }
+        
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            running = false;
+            Application.Exit();
+        }
+        #endregion
 
         public class Interfacex
         {
