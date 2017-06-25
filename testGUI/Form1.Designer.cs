@@ -43,6 +43,8 @@
             this.labelError = new System.Windows.Forms.Label();
             this.buttonReset = new System.Windows.Forms.Button();
             this.textBox2 = new System.Windows.Forms.TextBox();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // buttonLED
@@ -63,8 +65,11 @@
             // 
             // richTextBox1
             // 
+            this.richTextBox1.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.richTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.richTextBox1.Location = new System.Drawing.Point(12, 34);
             this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.ReadOnly = true;
             this.richTextBox1.Size = new System.Drawing.Size(291, 195);
             this.richTextBox1.TabIndex = 1;
             this.richTextBox1.Text = "";
@@ -83,7 +88,7 @@
             // labelSerial
             // 
             this.labelSerial.AutoSize = true;
-            this.labelSerial.Location = new System.Drawing.Point(12, 289);
+            this.labelSerial.Location = new System.Drawing.Point(9, 438);
             this.labelSerial.Name = "labelSerial";
             this.labelSerial.Size = new System.Drawing.Size(37, 13);
             this.labelSerial.TabIndex = 3;
@@ -92,7 +97,7 @@
             // labelFirmware
             // 
             this.labelFirmware.AutoSize = true;
-            this.labelFirmware.Location = new System.Drawing.Point(12, 302);
+            this.labelFirmware.Location = new System.Drawing.Point(9, 451);
             this.labelFirmware.Name = "labelFirmware";
             this.labelFirmware.Size = new System.Drawing.Size(52, 13);
             this.labelFirmware.TabIndex = 4;
@@ -109,11 +114,12 @@
             // 
             // listBoxVariables
             // 
+            this.listBoxVariables.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.listBoxVariables.FormattingEnabled = true;
             this.listBoxVariables.Location = new System.Drawing.Point(369, 60);
             this.listBoxVariables.Name = "listBoxVariables";
             this.listBoxVariables.ScrollAlwaysVisible = true;
-            this.listBoxVariables.Size = new System.Drawing.Size(392, 355);
+            this.listBoxVariables.Size = new System.Drawing.Size(392, 353);
             this.listBoxVariables.TabIndex = 6;
             this.listBoxVariables.SelectedIndexChanged += new System.EventHandler(this.listBoxVariables_SelectedIndexChanged);
             // 
@@ -131,7 +137,7 @@
             // 
             // buttonRefresh
             // 
-            this.buttonRefresh.Location = new System.Drawing.Point(369, 5);
+            this.buttonRefresh.Location = new System.Drawing.Point(369, 9);
             this.buttonRefresh.Name = "buttonRefresh";
             this.buttonRefresh.Size = new System.Drawing.Size(75, 23);
             this.buttonRefresh.TabIndex = 8;
@@ -152,14 +158,14 @@
             // labelError
             // 
             this.labelError.AutoSize = true;
-            this.labelError.Location = new System.Drawing.Point(369, 438);
+            this.labelError.Location = new System.Drawing.Point(26, 477);
             this.labelError.Name = "labelError";
             this.labelError.Size = new System.Drawing.Size(0, 13);
             this.labelError.TabIndex = 10;
             // 
             // buttonReset
             // 
-            this.buttonReset.Location = new System.Drawing.Point(12, 411);
+            this.buttonReset.Location = new System.Drawing.Point(12, 287);
             this.buttonReset.Name = "buttonReset";
             this.buttonReset.Size = new System.Drawing.Size(75, 23);
             this.buttonReset.TabIndex = 11;
@@ -177,14 +183,23 @@
             this.textBox2.TabIndex = 12;
             this.textBox2.Text = "ITEM       NAME                     TYPE       VALUE";
             // 
+            // panel1
+            // 
+            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.labelError);
+            this.panel1.Location = new System.Drawing.Point(336, -31);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(437, 511);
+            this.panel1.TabIndex = 13;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.SystemColors.ControlDark;
             this.ClientSize = new System.Drawing.Size(773, 476);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.buttonReset);
-            this.Controls.Add(this.labelError);
             this.Controls.Add(this.butonApply);
             this.Controls.Add(this.buttonRefresh);
             this.Controls.Add(this.textBox1);
@@ -195,12 +210,15 @@
             this.Controls.Add(this.buttonSyncTime);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.buttonLED);
+            this.Controls.Add(this.panel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Device Controller";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -222,6 +240,7 @@
         private System.Windows.Forms.Label labelError;
         private System.Windows.Forms.Button buttonReset;
         private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.Panel panel1;
     }
 }
 
