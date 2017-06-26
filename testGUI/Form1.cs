@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
+//using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -29,13 +29,15 @@ namespace testGUI
         bool ledStatus = false;
         volatile bool running = false;
         private int lastSelected = 0;
-        const string STATE = "STATE=",
-            INFO = "INFO=",
-            GETTIME = "GETTIME=",
-            SYNCTIME = "SYNCTIME",
-            GETVARS = "GETVARS=",
-            GETVAR = "GETVAR",
-            SETVAR = "SETVAR";
+        const string STATE = "<STATE>",
+            INFO = "<INFO>",
+            GETTIME = "<GETTIME>",
+            SYNCTIME = "<SYNCTIME",
+            GETVARS = "<GETVARS>",
+            GETVAR = "<GETVAR",
+            SETVAR = "<SETVAR",
+            RES = "<RES>";
+        
         Variables varHolder;
 
         
@@ -239,7 +241,7 @@ namespace testGUI
             {
                 if (type.Equals("bool") && (newValue.Equals("true") || newValue.Equals("false")))
                     newValue = varHolder.boolAr(newValue);
-                string message = SETVAR + index + '~' + newValue + '=';
+                string message = SETVAR + index + '~' + newValue + '>';
                 Console.WriteLine("index: " + index + "  type: " + type + "  newValue: " + newValue);
                 serialPort1.Write(message);
                 labelError.Text = "";
@@ -296,7 +298,7 @@ namespace testGUI
         */
         private void buttonRefresh_Click(object sender, EventArgs e)
         {
-            serialPort1.WriteLine("GETVARS");
+            serialPort1.WriteLine(GETVARS);
         }
 
         private void buttonIDSort_Click(object sender, EventArgs e)
@@ -389,7 +391,7 @@ namespace testGUI
         {
             Int32 unixTimestamp = (Int32)(DateTime.Now.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
             string unixDate = SYNCTIME;
-            unixDate += unixTimestamp + '=';
+            unixDate += unixTimestamp + '>';
             serialPort1.WriteLine(unixDate);
             //serialPort1.WriteLine("T1262347200");
         }    
@@ -399,7 +401,7 @@ namespace testGUI
         */
         private void buttonReset_Click(object sender, EventArgs e)
         {
-            serialPort1.WriteLine("RES=");
+            serialPort1.WriteLine(RES);
             richTextBox1.Clear();
         }
         /*
@@ -409,12 +411,12 @@ namespace testGUI
         {
             if (ledStatus) //the light is on
             {
-                serialPort1.WriteLine("OFF");
+                serialPort1.WriteLine("<OFF>");
                 buttonLED.Text = "OFF";
                 ledStatus = false;
             } else //the light is off
             {
-                serialPort1.WriteLine("ON");
+                serialPort1.WriteLine("<ON>");
                 buttonLED.Text = "ON";
                 ledStatus = true;
             }
