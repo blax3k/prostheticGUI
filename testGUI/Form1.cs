@@ -6,12 +6,13 @@ using System.Drawing;
 using System.Linq;
 //using System.Text;
 using System.Threading;
+using System.IO.Ports;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace testGUI
 {
-   
+
     public partial class Form1 : Form
     {
         public delegate void SetTextDelegate(String myString);
@@ -37,10 +38,10 @@ namespace testGUI
             GETVAR = "<GETVAR",
             SETVAR = "<SETVAR",
             RES = "<RES>";
-        
+
         Variables varHolder;
 
-        
+
 
         public Form1()
         {
@@ -60,25 +61,46 @@ namespace testGUI
             this.firmwrDelegate = new setFirmwrDelegate(setFirmware);
             this.timeDelegate = new setTimeDelegate(setTime);
             this.listBoxDelegate = new addListBoxDelegate(setListBox);
-
-            try
-            {                       
-                serialPort1.Open();//try to establish a connection
+            if (setPort())
+            {
+                //try to establish a connection
                 serialPort1.WriteLine(STATE); //get the state of the LED
                 serialPort1.WriteLine(INFO);    //get the serial number and firmware
                 serialPort1.WriteLine(GETTIME); //get the time from the board
                 serialPort1.WriteLine(GETVARS); //get the variables from the running program
-                //start new thread to handle periodically getting the time
+                                                //start new thread to handle periodically getting the time
                 Thread timeThread = new Thread(new ThreadStart(this.startTimeThread));
-                timeThread.IsBackground = true; 
+                timeThread.IsBackground = true;
                 timeThread.Start();
+            }
+            else
+            {
+                MessageBox.Show("No device detected" + "\n", "Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Close();
 
             }
-            catch (Exception exception) //no device detected
+        }
+
+        private bool setPort()
+        {
+            string[] ports = SerialPort.GetPortNames();
+            foreach (string port in ports)
             {
-                MessageBox.Show("No device detected" + "\n" + exception, "Load Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Close();
+                if (port.Equals("COM1"))
+                    continue;
+                try
+                {
+                    serialPort1.PortName = port;
+                    serialPort1.Open();
+                    serialPort1.WriteLine("");
+                    return true;
+                }
+                catch (Exception e)
+                {
+
+                }
             }
+            return false;
         }
 
         /*
@@ -106,7 +128,7 @@ namespace testGUI
                     }
                 }
                 else if (s.Contains("info=")) //get firmware and serial data. data formatted as "info=firmware~serial"
-                { 
+                {
                     s = s.Replace("info=", ""); //becomes "firmware~serial"
                     string[] infoArray = s.Split('~'); //split into firmware and serial
                     labelSerial.Invoke(this.serialDelegate, new Object[] { infoArray[1] });
@@ -120,7 +142,7 @@ namespace testGUI
                 else if (s.Contains("VAR=")) //receive a single variable data
                 {
                     //Console.WriteLine(s);
-                    s = s.Replace("VAR=", ""); 
+                    s = s.Replace("VAR=", "");
                     string[] var = s.Split('~');
                     varHolder.addVariable(var);
                     listBoxVariables.Invoke(this.listBoxDelegate, new Object[] { varHolder.varList });
@@ -129,15 +151,14 @@ namespace testGUI
                 {
                     richTextBox1.Invoke(this.textDelegate, new Object[] { s });
                 }
-            }catch(Exception exception)
+            }
+            catch (Exception exception)
             {
 
                 MessageBox.Show("The Device couldn't be reached" + "\n" + exception, "Runtime Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
             }
         }
-
-
 
         //------------------Set text for Form1 items-------------------\\
         #region setText
@@ -229,6 +250,8 @@ namespace testGUI
         //------------------- textbox interaction--------------------\\
         #region textBox
 
+        bool alreadyFocused;
+
         /*
         User wishes to modify the variable
         */
@@ -251,16 +274,16 @@ namespace testGUI
             else
             {
                 textBox1.Text = varHolder.varList[index].value;
-                alreadyFocused = false;                
+                alreadyFocused = false;
                 labelError.Text = "Invalid input type. please enter a(n) " + type;
             }
         }
-        bool alreadyFocused;
+
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
-            if(e.KeyCode == Keys.Enter)
+            if (e.KeyCode == Keys.Enter)
             {
-                butonApply_Click(this, new EventArgs());   
+                butonApply_Click(this, new EventArgs());
             }
         }
 
@@ -269,10 +292,10 @@ namespace testGUI
             alreadyFocused = false;
         }
 
- 
+
         private void textBox1_MouseUp(object sender, MouseEventArgs e)
         {
-            if(!alreadyFocused && this.textBox1.SelectionLength == 0)
+            if (!alreadyFocused && this.textBox1.SelectionLength == 0)
             {
                 alreadyFocused = true;
                 this.textBox1.SelectAll();
@@ -394,7 +417,7 @@ namespace testGUI
             unixDate += unixTimestamp + '>';
             serialPort1.WriteLine(unixDate);
             //serialPort1.WriteLine("T1262347200");
-        }    
+        }
 
         /*
         Reset button is pressed
@@ -414,7 +437,8 @@ namespace testGUI
                 serialPort1.WriteLine("<OFF>");
                 buttonLED.Text = "OFF";
                 ledStatus = false;
-            } else //the light is off
+            }
+            else //the light is off
             {
                 serialPort1.WriteLine("<ON>");
                 buttonLED.Text = "ON";
