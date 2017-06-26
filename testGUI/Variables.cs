@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace testGUI
 {
-
+    /*
+    holds the variable information
+    */
     public struct Variable
     {
         public int id;
@@ -26,7 +28,6 @@ namespace testGUI
             return "VAR=" + id + "~" + name + "~" + type + "~" + value;
         }
     }
-
 
 
     class Variables
@@ -59,6 +60,9 @@ namespace testGUI
             }
         }
 
+        /*
+        converts arduino bool string to more readable format
+        */
         public string boolCS(string val)
         {
             if (val.Contains("0"))
@@ -66,7 +70,9 @@ namespace testGUI
             else
                 return "true";
         }
-
+        /*
+        returns a converted version of string bool for Arduino
+        */
         public string boolAr(string val)
         {
             if (val.Equals("false"))
@@ -163,13 +169,21 @@ namespace testGUI
             return result;
         }
 
+        /*
+        takes in the index/id and returns the type of the variable
+        */
         public string getType(int searchID)
         {
             var result = varList.FindIndex(x => x.id == searchID);
             return varList[result].type;
         }
 
+        /*
+        Compares the type and value to make sure that the value can
+        be converted after it is written to the Arduino board
 
+            note that Strings do have a max length
+        */
         public bool validVarChange(string type, string value)
         {
             if (type.Equals("int")) //Check for valid integer
@@ -180,7 +194,7 @@ namespace testGUI
                     return true;
                 }
                 return false;
-            }else if (type.Equals("word"))
+            }else if (type.Equals("word")) //check for valid word/unsigned int
             {
                 uint result;
                 if (uint.TryParse(value, out result))
@@ -189,25 +203,25 @@ namespace testGUI
                 }
                 return false;
             }
-            else if (type.Equals("string"))
+            else if (type.Equals("string")) //check for valid string
             {
                 if (value.Length > MAX_STRING_LENGTH)
                 {
                     value = value.Substring(0, MAX_STRING_LENGTH);
                 }
                 return true;
-            }else if (type.Equals("bool"))
+            }else if (type.Equals("bool")) //check for valid boolean
             {
                 if (value.Equals("0") || value.Equals("1") || 
                     value.Equals("true") || value.Equals("false"))
                     return true;
                 return false;
-            } else if (type.Equals("char"))
+            } else if (type.Equals("char")) //check for valid char
             {
                 if (value.Length > 1)
                     return false;
                 return true;
-            } else if (type.Equals("long"))
+            } else if (type.Equals("long")) //check for valid long
             {
                 long result;
                 if (long.TryParse(value, out result))
@@ -215,7 +229,7 @@ namespace testGUI
                     return true;
                 }
                 return false;
-            } else if (type.Equals("ulong"))
+            } else if (type.Equals("ulong")) //check for valid unsigned long
             {
                 ulong result;
                 if (ulong.TryParse(value, out result))
@@ -223,8 +237,8 @@ namespace testGUI
                     return true;
                 }
                 return false;
-            }  else if (type.Equals("float") || type.Equals("double"))
-            {
+            }  else if (type.Equals("float") || type.Equals("double")) //check for valid float/double
+            {   //note that float and double are the same on the arduino platform
                 float result;
                 if (float.TryParse(value, out result))
                 {

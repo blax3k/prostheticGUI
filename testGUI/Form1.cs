@@ -28,9 +28,6 @@ namespace testGUI
         public addListBoxDelegate listBoxDelegate;
         bool ledStatus = false;
         volatile bool running = false;
-        string serialNumber = "";
-        string firmwareNumber = "";
-        int varCount = 0;
         private int lastSelected = 0;
         const string STATE = "STATE=",
             INFO = "INFO=",
@@ -198,24 +195,26 @@ namespace testGUI
         {
             labelTime.Text = time;
         }
-
+        /*
+        fills the listbox with the contents of the variable list (varList)
+        */
         private void setListBox(List<Variable> itemList)
         {
             listBoxVariables.Items.Clear();
-            foreach (Variable var in itemList)
+            foreach (Variable var in itemList) //for each item in varList
             {
-                string varID = var.id.ToString();
+                string varID = var.id.ToString();   //get the id of item
                 string listItem = varID.PadRight(6 - varID.Length) + "\t" +
                    var.name.PadRight(20 - var.name.Length) + "\t" +
                    var.type.PadRight(10 - var.type.Length) + "\t" +
-                   var.value;
-                listBoxVariables.Items.Add(listItem);
+                   var.value;                       //format string
+                listBoxVariables.Items.Add(listItem); //add to the listbox
             }
 
-            if (this.listBoxVariables.SelectedIndex == -1)
+            if (this.listBoxVariables.SelectedIndex == -1) //if no item is selected
             {
-                lastSelected = varHolder.getIndex(lastSelected);
-                this.listBoxVariables.SetSelected(lastSelected, true);
+                lastSelected = varHolder.getIndex(lastSelected); //get the last selected item
+                this.listBoxVariables.SetSelected(lastSelected, true); //select that item
             }
         }
         #endregion
@@ -403,7 +402,9 @@ namespace testGUI
             serialPort1.WriteLine("RES=");
             richTextBox1.Clear();
         }
-
+        /*
+        LED button is pressed (OFF/ON)
+        */
         private void buttonLED_Click(object sender, EventArgs e)
         {
             if (ledStatus) //the light is on
