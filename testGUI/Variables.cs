@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace testGUI
 {
+
     public struct Variable
     {
         public int id;
@@ -25,12 +26,15 @@ namespace testGUI
             return "VAR=" + id + "~" + name + "~" + type + "~" + value;
         }
     }
+
+
+
     class Variables
     {
-
+        const int MAX_STRING_LENGTH = 50;
         public List<Variable> varList = new List<Variable>();
-
-       
+        private bool ascending = true;
+        private string lastSort = "name";
 
         /*
         Adds a variable to the variable list, or replaces variable if matching ID is found
@@ -39,6 +43,8 @@ namespace testGUI
         {
             int varID = int.Parse(var[0]);
             int index = varList.FindIndex(variable => variable.id == varID);
+            if (var[2].Equals("bool"))
+                var[3] = boolCS(var[3]);
             if (index >= 0) //found. replace value of item in list 
             {
                 varList[index] = new Variable(varID, var[1], var[2], var[3]);
@@ -53,6 +59,116 @@ namespace testGUI
             }
         }
 
+        public string boolCS(string val)
+        {
+            if (val.Contains("0"))
+                return "false";
+            else
+                return "true";
+        }
+
+        public string boolAr(string val)
+        {
+            if (val.Equals("false"))
+                return "0";
+            else if(val.Equals("true"))
+                return "1";
+            return "0";
+        }
+
+        #region sortList
+
+        public void sortList(string sortBy)
+        {
+            if (sortBy.Equals("name")) {
+                decideSort("name");
+            }else if (sortBy.Equals("id")){
+                decideSort("id");
+            }else if (sortBy.Equals("type")){
+                decideSort("type");
+            }else if (sortBy.Equals("value")) {
+                decideSort("value");
+            }else if (sortBy.Equals("bool")) {
+                decideSort("bool");
+            }
+        }
+
+        private void decideSort(string attribute) {
+            if (lastSort.Equals(attribute)) //already sorted by this attribute
+            {
+                if (ascending) //list is in ascending order
+                {
+                    sortItem(attribute, !ascending); //sort list in descending order
+                    ascending = false;
+                }
+                else //list is in descending order
+                {
+                    sortItem(attribute, !ascending); //sort list in ascending order
+                    ascending = true;
+                }
+            }
+            else //sorted by another attribute
+            {
+                if (ascending) //last sort was by ascending
+                {
+                    sortItem(attribute, ascending); //sort list in ascending order
+                }
+                else //last sort was by descending
+                {
+                    sortItem(attribute, ascending); //sort list in descending order
+                }
+                lastSort = attribute;
+            }
+        }
+
+        private void sortItem(string attribute, bool sortAsc)
+        {
+            if (attribute.Equals("name"))
+            {
+                if(sortAsc)
+                    varList.Sort((x, y) => x.name.CompareTo(y.name)); //sort list in ascending order
+                else
+                    varList.Sort((x, y) => y.name.CompareTo(x.name)); //sort list in ascending order
+            }
+            else if (attribute.Equals("id"))
+            {
+                if (sortAsc)
+                    varList.Sort((x, y) => x.id.CompareTo(y.id)); //sort list in ascending order
+                else
+                    varList.Sort((x, y) => y.id.CompareTo(x.id)); //sort list in ascending order
+            }
+            else if (attribute.Equals("type"))
+            {
+                if (sortAsc)
+                    varList.Sort((x, y) => x.type.CompareTo(y.type)); //sort list in ascending order
+                else
+                    varList.Sort((x, y) => y.type.CompareTo(x.type)); //sort list in ascending order
+            }
+            else if (attribute.Equals("value"))
+            {
+                if (sortAsc)
+                    varList.Sort((x, y) => x.value.CompareTo(y.value)); //sort list in ascending order
+                else
+                    varList.Sort((x, y) => y.value.CompareTo(x.value)); //sort list in ascending order
+            }
+        }
+        #endregion
+
+        /*
+        returns the list index of the item with the matching id
+        */
+        public int getIndex(int searchID)
+        {
+            var result = varList.FindIndex(x => x.id == searchID);
+            return result;
+        }
+
+        public string getType(int searchID)
+        {
+            var result = varList.FindIndex(x => x.id == searchID);
+            return varList[result].type;
+        }
+
 
         public bool validVarChange(string type, string value)
         {
@@ -64,14 +180,57 @@ namespace testGUI
                     return true;
                 }
                 return false;
+            }else if (type.Equals("word"))
+            {
+                uint result;
+                if (uint.TryParse(value, out result))
+                {
+                    return true;
+                }
+                return false;
             }
             else if (type.Equals("string"))
             {
-                if (value.Length > 50)
+                if (value.Length > MAX_STRING_LENGTH)
                 {
-                    value = value.Substring(0, 50);
+                    value = value.Substring(0, MAX_STRING_LENGTH);
                 }
                 return true;
+            }else if (type.Equals("bool"))
+            {
+                if (value.Equals("0") || value.Equals("1") || 
+                    value.Equals("true") || value.Equals("false"))
+                    return true;
+                return false;
+            } else if (type.Equals("char"))
+            {
+                if (value.Length > 1)
+                    return false;
+                return true;
+            } else if (type.Equals("long"))
+            {
+                long result;
+                if (long.TryParse(value, out result))
+                {
+                    return true;
+                }
+                return false;
+            } else if (type.Equals("ulong"))
+            {
+                ulong result;
+                if (ulong.TryParse(value, out result))
+                {
+                    return true;
+                }
+                return false;
+            }  else if (type.Equals("float") || type.Equals("double"))
+            {
+                float result;
+                if (float.TryParse(value, out result))
+                {
+                    return true;
+                }
+                return false;
             }
             else
             {

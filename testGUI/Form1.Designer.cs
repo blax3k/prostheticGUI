@@ -39,11 +39,14 @@
             this.listBoxVariables = new System.Windows.Forms.ListBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.buttonRefresh = new System.Windows.Forms.Button();
-            this.butonApply = new System.Windows.Forms.Button();
+            this.buttonApply = new System.Windows.Forms.Button();
             this.labelError = new System.Windows.Forms.Label();
             this.buttonReset = new System.Windows.Forms.Button();
-            this.textBox2 = new System.Windows.Forms.TextBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.buttonValueSort = new System.Windows.Forms.Button();
+            this.buttonTypeSort = new System.Windows.Forms.Button();
+            this.buttonNameSort = new System.Windows.Forms.Button();
+            this.buttonIDSort = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -114,12 +117,12 @@
             // 
             // listBoxVariables
             // 
-            this.listBoxVariables.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.listBoxVariables.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.listBoxVariables.FormattingEnabled = true;
-            this.listBoxVariables.Location = new System.Drawing.Point(369, 60);
+            this.listBoxVariables.Location = new System.Drawing.Point(32, 92);
             this.listBoxVariables.Name = "listBoxVariables";
             this.listBoxVariables.ScrollAlwaysVisible = true;
-            this.listBoxVariables.Size = new System.Drawing.Size(392, 353);
+            this.listBoxVariables.Size = new System.Drawing.Size(392, 351);
             this.listBoxVariables.TabIndex = 6;
             this.listBoxVariables.SelectedIndexChanged += new System.EventHandler(this.listBoxVariables_SelectedIndexChanged);
             // 
@@ -147,13 +150,13 @@
             // 
             // butonApply
             // 
-            this.butonApply.Location = new System.Drawing.Point(686, 421);
-            this.butonApply.Name = "butonApply";
-            this.butonApply.Size = new System.Drawing.Size(75, 23);
-            this.butonApply.TabIndex = 9;
-            this.butonApply.Text = "Apply";
-            this.butonApply.UseVisualStyleBackColor = true;
-            this.butonApply.Click += new System.EventHandler(this.butonApply_Click);
+            this.buttonApply.Location = new System.Drawing.Point(686, 421);
+            this.buttonApply.Name = "butonApply";
+            this.buttonApply.Size = new System.Drawing.Size(75, 23);
+            this.buttonApply.TabIndex = 9;
+            this.buttonApply.Text = "Apply";
+            this.buttonApply.UseVisualStyleBackColor = true;
+            this.buttonApply.Click += new System.EventHandler(this.butonApply_Click);
             // 
             // labelError
             // 
@@ -173,24 +176,80 @@
             this.buttonReset.UseVisualStyleBackColor = true;
             this.buttonReset.Click += new System.EventHandler(this.buttonReset_Click);
             // 
-            // textBox2
-            // 
-            this.textBox2.Enabled = false;
-            this.textBox2.Location = new System.Drawing.Point(369, 43);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.ReadOnly = true;
-            this.textBox2.Size = new System.Drawing.Size(392, 20);
-            this.textBox2.TabIndex = 12;
-            this.textBox2.Text = "ITEM       NAME                     TYPE       VALUE";
-            // 
             // panel1
             // 
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel1.Controls.Add(this.labelError);
+            this.panel1.Controls.Add(this.listBoxVariables);
+            this.panel1.Controls.Add(this.buttonIDSort);
+            this.panel1.Controls.Add(this.buttonNameSort);
+            this.panel1.Controls.Add(this.buttonTypeSort);
+            this.panel1.Controls.Add(this.buttonValueSort);
             this.panel1.Location = new System.Drawing.Point(336, -31);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(437, 511);
             this.panel1.TabIndex = 13;
+            this.panel1.Click += new System.EventHandler(this.panel1_Click);
+            // 
+            // buttonValueSort
+            // 
+            this.buttonValueSort.BackColor = System.Drawing.SystemColors.Control;
+            this.buttonValueSort.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.buttonValueSort.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonValueSort.ImageAlign = System.Drawing.ContentAlignment.BottomRight;
+            this.buttonValueSort.Location = new System.Drawing.Point(221, 70);
+            this.buttonValueSort.Name = "buttonValueSort";
+            this.buttonValueSort.Size = new System.Drawing.Size(203, 23);
+            this.buttonValueSort.TabIndex = 16;
+            this.buttonValueSort.Text = "Value";
+            this.buttonValueSort.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.buttonValueSort.UseVisualStyleBackColor = false;
+            this.buttonValueSort.Click += new System.EventHandler(this.buttonValueSort_Click);
+            // 
+            // buttonTypeSort
+            // 
+            this.buttonTypeSort.BackColor = System.Drawing.SystemColors.Control;
+            this.buttonTypeSort.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.buttonTypeSort.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonTypeSort.ImageAlign = System.Drawing.ContentAlignment.BottomRight;
+            this.buttonTypeSort.Location = new System.Drawing.Point(170, 70);
+            this.buttonTypeSort.Name = "buttonTypeSort";
+            this.buttonTypeSort.Size = new System.Drawing.Size(45, 23);
+            this.buttonTypeSort.TabIndex = 15;
+            this.buttonTypeSort.Text = "Type";
+            this.buttonTypeSort.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.buttonTypeSort.UseVisualStyleBackColor = false;
+            this.buttonTypeSort.Click += new System.EventHandler(this.buttonTypeSort_Click);
+            // 
+            // buttonNameSort
+            // 
+            this.buttonNameSort.BackColor = System.Drawing.SystemColors.Control;
+            this.buttonNameSort.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.buttonNameSort.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonNameSort.ImageAlign = System.Drawing.ContentAlignment.BottomRight;
+            this.buttonNameSort.Location = new System.Drawing.Point(80, 70);
+            this.buttonNameSort.Name = "buttonNameSort";
+            this.buttonNameSort.Size = new System.Drawing.Size(84, 23);
+            this.buttonNameSort.TabIndex = 14;
+            this.buttonNameSort.Text = "Name";
+            this.buttonNameSort.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.buttonNameSort.UseVisualStyleBackColor = false;
+            this.buttonNameSort.Click += new System.EventHandler(this.buttonNameSort_Click);
+            // 
+            // buttonIDSort
+            // 
+            this.buttonIDSort.BackColor = System.Drawing.SystemColors.Control;
+            this.buttonIDSort.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.buttonIDSort.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonIDSort.ImageAlign = System.Drawing.ContentAlignment.BottomRight;
+            this.buttonIDSort.Location = new System.Drawing.Point(32, 70);
+            this.buttonIDSort.Name = "buttonIDSort";
+            this.buttonIDSort.Size = new System.Drawing.Size(42, 23);
+            this.buttonIDSort.TabIndex = 13;
+            this.buttonIDSort.Text = "ID";
+            this.buttonIDSort.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.buttonIDSort.UseVisualStyleBackColor = false;
+            this.buttonIDSort.Click += new System.EventHandler(this.buttonIDSort_Click);
             // 
             // Form1
             // 
@@ -198,12 +257,10 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDark;
             this.ClientSize = new System.Drawing.Size(773, 476);
-            this.Controls.Add(this.textBox2);
             this.Controls.Add(this.buttonReset);
-            this.Controls.Add(this.butonApply);
+            this.Controls.Add(this.buttonApply);
             this.Controls.Add(this.buttonRefresh);
             this.Controls.Add(this.textBox1);
-            this.Controls.Add(this.listBoxVariables);
             this.Controls.Add(this.labelTime);
             this.Controls.Add(this.labelFirmware);
             this.Controls.Add(this.labelSerial);
@@ -217,6 +274,7 @@
             this.Text = "Device Controller";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.Click += new System.EventHandler(this.Form1_Click);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.ResumeLayout(false);
@@ -236,11 +294,14 @@
         private System.Windows.Forms.ListBox listBoxVariables;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button buttonRefresh;
-        private System.Windows.Forms.Button butonApply;
+        private System.Windows.Forms.Button buttonApply;
         private System.Windows.Forms.Label labelError;
         private System.Windows.Forms.Button buttonReset;
-        private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Button buttonValueSort;
+        private System.Windows.Forms.Button buttonTypeSort;
+        private System.Windows.Forms.Button buttonNameSort;
+        private System.Windows.Forms.Button buttonIDSort;
     }
 }
 
